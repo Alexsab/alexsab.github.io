@@ -29,7 +29,7 @@ jobs:
           format: markdown
           message: |
             [${{ github.repository }}] ${{ github.actor }}:
-            length: ${{ github.event.commits.Length }}, ${{ github.event.commits.Count }}
+            length: ${{ length(github.event.commits.Length) }}
             Commit message: ${{ github.event.commits[0].message }}
 
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
