@@ -3,4 +3,4 @@
 
 test repo
 
-add action 4
+add -100 to channel id
