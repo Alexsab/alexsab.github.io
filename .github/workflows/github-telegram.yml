@@ -38,6 +38,7 @@ jobs:
             GITHUB_REF: ${{ github.ref }}
             GITHUB_WORKFLOW: ${{ github.workflow }}
             GITHUB_ACTION: ${{ github.action }}
-            GITHUB_EVENT_NAME: github.${{ event.name }}
-            GITHUB_EVENT_PATH: github.${{ event.path }}
+            GITHUB_EVENT_NAME: ${{ github.event.name }}
+            GITHUB_EVENT_ Action: ${{ github.event.action }}
+            GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH
             GITHUB_WORKSPACE: ${{ github.workspace }}
