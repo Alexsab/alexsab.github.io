@@ -27,9 +27,17 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ github.actor }} created commit:
+            [${{ github.repository }}] ${{ github.actor }}:
             Commit message: ${{ github.event.commits[0].message }}
 
-            Repository: ${{ github.repository }}
-
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+
+            GITHUB_REPOSITORY: ${{ github.repository }}
+            GITHUB_ACTOR: ${{ github.actor }}
+            GITHUB_SHA: ${{ github.sha }}
+            GITHUB_REF: ${{ github.ref }}
+            GITHUB_WORKFLOW: ${{ github.workflow }}
+            GITHUB_ACTION: ${{ github.action }}
+            GITHUB_EVENT_NAME: github.${{ event.name }}
+            GITHUB_EVENT_PATH: github.${{ event.path }}
+            GITHUB_WORKSPACE: ${{ github.workspace }}
