@@ -20,7 +20,10 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Logging
+        run: |
+          echo "${{toJSON(github.event)}}"
+
       - name: send default message
         uses: appleboy/telegram-action@master
         with:
@@ -28,17 +31,7 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             [${{ github.repository }}] ${{ github.actor }}:
+            ${{ github.event.commits.length }}
             Commit message: ${{ github.event.commits[0].message }}
 
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
-
-            GITHUB_REPOSITORY: ${{ github.repository }}
-            GITHUB_ACTOR: ${{ github.actor }}
-            GITHUB_SHA: ${{ github.sha }}
-            GITHUB_REF: ${{ github.ref }}
-            GITHUB_WORKFLOW: ${{ github.workflow }}
-            GITHUB_ACTION: ${{ github.action }}
-            GITHUB_EVENT_NAME: ${{ github.event.name }}
-            GITHUB_EVENT_ Action: ${{ github.event.action }}
-            GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH
-            GITHUB_WORKSPACE: ${{ github.workspace }}
