@@ -28,7 +28,7 @@ jobs:
           disable_web_page_preview: true
           format: markdown
           message: |
-            **[${{ github.repository }}:${{ github.ref_name }}]** ${{ github.actor }}:
+            *\[${{ github.repository }}:${{ github.ref_name }}\]* ${{ github.actor }}:
 
             Commit message: ${{ github.event.commits[0].message }}
 
