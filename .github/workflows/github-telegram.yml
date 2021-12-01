@@ -3,9 +3,6 @@ name: telegram message
 # Controls when the workflow will run
 on: [push, pull_request]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a job called "build" adn "log-github-event-goodies"
