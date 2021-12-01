@@ -24,8 +24,12 @@ jobs:
           if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             git log --pretty=format:"'\`%h\`' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
           else
-            git log --pretty=format:"'\`%h\`' - %an, %ar : %s" ${{ github.sha }} > COMMITS_LIST
+            git log --pretty=format:"'\`%h\`' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
           fi
+
+      - name: Logging
+        run: |
+          echo "$(cat COMMITS_LIST)
 
       - name: Set outputs
         id: commits_list
