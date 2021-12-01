@@ -16,32 +16,19 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
 
-      - name: Logging1
+      - name: Get commits
         uses: actions/checkout@v2
         with:
           # checkout full tree
           fetch-depth: 0
       - run: |
-          git fetch origin master
-          git checkout master
-          echo "$(git branch -v)"
-
-      - uses: actions/checkout@v2
-        with:
-          # checkout full tree
-          fetch-depth: 0
-      - run: |
-          git fetch origin master
-          git checkout master
           if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             git log --pretty=format:"'\`%h\`' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
           else
+            git fetch origin master
+            git checkout master
             git log --pretty=format:"'\`%h\`' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
           fi
-
-      - name: Logging
-        run: |
-          echo "$(cat COMMITS_LIST)"
 
       - name: Set outputs
         id: commits_list
@@ -53,7 +40,7 @@ jobs:
           COMMITS_STRING="${COMMITS_STRING//$'\r'/'%0D'}"
           echo "::set-output name=full_list::$COMMITS_STRING"
 
-      - name: send default message
+      - name: Send message to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -77,7 +64,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
 
-      - name: send default message
+      - name: Send message to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -87,7 +74,7 @@ jobs:
           message: |
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
-            create [${{ github.event.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.ref }}) from [${{ github.event.master_branch }}](https://github.com/${{ github.repository }}/tree/${{ github.event.master_branch }})
+            added branch [${{ github.event.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.ref }}) from [${{ github.event.master_branch }}](https://github.com/${{ github.repository }}/tree/${{ github.event.master_branch }})
 
   pull_request:
 
@@ -99,7 +86,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
 
-      - name: send default message
+      - name: Send message to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -109,7 +96,8 @@ jobs:
           message: |
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
-            pull request from [${{ github.event.pull_request.head.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.head.ref }}) to [${{ github.event.pull_request.master.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.master.ref }})
+            pull request from [${{ github.event.pull_request.head.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.head.ref }}) to [${{ github.event.pull_request.base.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.base.ref }}) with comment:
+            ${{ github.event.pull_request.body }}
 
   delete:
 
@@ -121,7 +109,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
 
-      - name: send default message
+      - name: Send message to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -131,12 +119,12 @@ jobs:
           message: |
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
-            delete brunch '`${{ github.event.ref }}`'
+            branch '`${{ github.event.ref }}`' is deleted
 
-  log-github-event-goodies:
-    name: "LOG Everything on GitHub Event"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Logging
-        run: |
-          echo "${{ toJSON( github.event ) }}"
+  # log-github-event-goodies:
+  #   name: "LOG Everything on GitHub Event"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Logging
+  #       run: |
+  #         echo "${{ toJSON( github.event ) }}"
