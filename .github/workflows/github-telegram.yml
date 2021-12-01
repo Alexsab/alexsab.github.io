@@ -49,7 +49,6 @@ jobs:
 
             ${{ steps.commits_list.outputs.full_list }}
 
-            [See changes](${{ github.event.commits[0].url }})
 
   # log-github-event-goodies:
   #   name: "LOG Everything on GitHub Event"
