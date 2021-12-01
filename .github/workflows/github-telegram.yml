@@ -23,17 +23,24 @@ jobs:
           fetch-depth: 0
       - run: |
           if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            git log --pretty=format:"'\`%h\`' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
+            git log -5 --pretty=format:"'\`%h\`' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
           else
             git fetch origin master
             git checkout master
-            git log --pretty=format:"'\`%h\`' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
+            git log -5 --pretty=format:"'\`%h\`' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
           fi
 
       - name: Set outputs
         id: commits_list
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
+          LINES_COUNT=$(grep -c ".*" COMMITS_LIST)
+          if [ "$LINES_COUNT" == "1" ]; then
+            echo "::set-output name=lines_count::$LINES_COUNT new commit"
+          else
+            echo "::set-output name=lines_count::$LINES_COUNT new commits"
+          fi
+
           COMMITS_STRING=$(cat COMMITS_LIST)
           COMMITS_STRING="${COMMITS_STRING//'%'/'%25'}"
           COMMITS_STRING="${COMMITS_STRING//$'\n'/'%0A'}"
@@ -48,11 +55,10 @@ jobs:
           disable_web_page_preview: true
           format: markdown
           message: |
-            *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
+            [*[${{ github.event.repository.name }}:${{ github.ref_name }}] ${{ steps.commits_list.outputs.lines_count }}*](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }}) by *${{ github.actor }}*
 
             ${{ steps.commits_list.outputs.full_list }}
 
-            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
 
   create:
 
