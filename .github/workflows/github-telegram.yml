@@ -97,7 +97,7 @@ jobs:
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
             pull request from [${{ github.event.pull_request.head.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.head.ref }}) to [${{ github.event.pull_request.base.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.base.ref }})
-            __with comment:__
+            _with comment_:
             ${{ github.event.pull_request.body }}
 
   delete:
@@ -122,10 +122,10 @@ jobs:
 
             branch '`${{ github.event.ref }}`' is deleted
 
-  log-github-event-goodies:
-    name: "LOG Everything on GitHub Event"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Logging
-        run: |
-          echo "${{ toJSON( github.event ) }}"
+  # log-github-event-goodies:
+  #   name: "LOG Everything on GitHub Event"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Logging
+  #       run: |
+  #         echo "${{ toJSON( github.event ) }}"
