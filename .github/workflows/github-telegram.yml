@@ -6,12 +6,16 @@ on: [push, pull_request, create, delete, issues]
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a job called "build" adn "log-github-event-goodies"
-  build:
+  push:
+
+    if: ${{ github.event.commits != null }}
+
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
       - uses: actions/checkout@v2
         with:
           # checkout full tree
@@ -28,6 +32,78 @@ jobs:
           COMMITS_STRING="${COMMITS_STRING//$'\n'/'%0A'}"
           COMMITS_STRING="${COMMITS_STRING//$'\r'/'%0D'}"
           echo "::set-output name=full_list::$COMMITS_STRING"
+
+      - name: send default message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_web_page_preview: true
+          format: markdown
+          message: |
+            *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
+
+            ${{ steps.commits_list.outputs.full_list }}
+
+            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
+
+  create:
+
+    if: ${{ github.event.master_branch != null && github.event.commits == null }}
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+
+      - name: send default message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_web_page_preview: true
+          format: markdown
+          message: |
+            *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
+
+            create ${{ github.event.ref }} from ${{ github.event.master_branch }}
+
+            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
+
+  pull_request:
+
+    if: ${{ github.event.head.ref != null && github.event.commits == null }}
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+
+      - name: send default message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          disable_web_page_preview: true
+          format: markdown
+          message: |
+            *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
+
+            pull request from ${{ github.event.head.ref }} to ${{ github.event.master.ref }}
+
+            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
+
+  delete:
+
+    if: ${{ github.event.master_branch == null && github.event.commits == null }}
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
 
       - name: send default message
         uses: appleboy/telegram-action@master
