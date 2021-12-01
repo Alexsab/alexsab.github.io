@@ -37,6 +37,8 @@ jobs:
       - name: Set outputs
         id: commits_list
         run: 'echo "::set-output name=full_list::$(git log --pretty=format:\"%h - %an, %ar : %s\" ${{ github.event.before }}..${{ github.sha }})"'
+        # run: 'echo "::set-output name=full_list::$(git log --pretty=format:\"%h - %an, %ar : %s\" ${{ github.event.before }}..${{ github.sha }})"'
+        run: 'echo "::set-output name=full_list::$(cat COMMITS_LIST)"'
 
       - name: send default message
         uses: appleboy/telegram-action@master
@@ -49,7 +51,6 @@ jobs:
             *[${{ github.repository }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
             ${{ steps.commits_list.outputs.full_list }}
-            ${{ cat COMMITS_LIST }}
 
             [See changes](${{ github.event.commits[0].url }})
           #https://github.com/${{ github.repository }}/commit/${{github.sha}}
