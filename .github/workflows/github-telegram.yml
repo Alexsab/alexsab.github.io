@@ -55,7 +55,7 @@ jobs:
           disable_web_page_preview: true
           format: markdown
           message: |
-            *[\[${{ github.event.repository.name }}:${{ github.ref_name }}\] ${{ steps.commits_list.outputs.lines_count }}](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})* by *${{ github.actor }}*
+            *[${{ github.event.repository.name }}:${{ github.ref_name }}]* [${{ steps.commits_list.outputs.lines_count }}](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }}) by *${{ github.actor }}*
 
             ${{ steps.commits_list.outputs.full_list }}
 
