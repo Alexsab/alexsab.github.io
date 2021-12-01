@@ -49,6 +49,7 @@ jobs:
 
             ${{ steps.commits_list.outputs.full_list }}
 
+            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
 
   # log-github-event-goodies:
   #   name: "LOG Everything on GitHub Event"
