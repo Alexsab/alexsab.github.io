@@ -25,7 +25,7 @@ jobs:
           # checkout full tree
           fetch-depth: 0
       - run: |
-          git log --pretty=format:"%h - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
+          git log --pretty=format:"'\`%h\`' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
 
       - name: Set outputs
         id: commits_list
