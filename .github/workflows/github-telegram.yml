@@ -16,6 +16,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
 
+      - name: Logging1
+        run: |
+          echo "$(git branch -v)"
+
       - uses: actions/checkout@v2
         with:
           # checkout full tree
@@ -29,7 +33,7 @@ jobs:
 
       - name: Logging
         run: |
-          echo "$(cat COMMITS_LIST)
+          echo "$(cat COMMITS_LIST)"
 
       - name: Set outputs
         id: commits_list
