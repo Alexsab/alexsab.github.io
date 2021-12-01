@@ -67,13 +67,11 @@ jobs:
           message: |
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
-            create ${{ github.event.ref }} from ${{ github.event.master_branch }}
-
-            [See changes](https://github.com/${{ github.repository }}/tree/${{ github.event.ref }}
+            create [${{ github.event.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.ref }} from [${{ github.event.master_branch }}](https://github.com/${{ github.repository }}/tree/${{ github.event.master_branch }}
 
   pull_request:
 
-    if: ${{ github.event.head.ref != null && github.event.commits == null }}
+    if: ${{ github.event.pull_request != null }}
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -91,13 +89,11 @@ jobs:
           message: |
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
-            pull request from ${{ github.event.head.ref }} to ${{ github.event.master.ref }}
-
-            [See changes](https://github.com/${{ github.repository }}/tree/${{ github.event.head.ref }}
+            pull request from [${{ github.event.pull_request.head.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.head.ref }} to [${{ github.event.pull_request.master.ref }}](https://github.com/${{ github.repository }}/tree/${{ github.event.master.ref }}
 
   delete:
 
-    if: ${{ github.event.master_branch == null && github.event.commits == null }}
+    if: ${{ github.event.master_branch == null && github.event.commits == null && github.event.pull_request == null }}
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
