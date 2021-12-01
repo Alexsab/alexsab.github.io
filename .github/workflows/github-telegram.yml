@@ -17,7 +17,11 @@ jobs:
     steps:
 
       - name: Logging1
-        run: |
+        uses: actions/checkout@v2
+        with:
+          # checkout full tree
+          fetch-depth: 0
+      - run: |
           echo "$(git branch -v)"
 
       - uses: actions/checkout@v2
