@@ -43,10 +43,10 @@ jobs:
 
             [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
 
-  # log-github-event-goodies:
-  #   name: "LOG Everything on GitHub Event"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Logging
-  #       run: |
-  #         echo "${{ toJSON( github.event ) }}"
+  log-github-event-goodies:
+    name: "LOG Everything on GitHub Event"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Logging
+        run: |
+          echo "${{ toJSON( github.event ) }}"
