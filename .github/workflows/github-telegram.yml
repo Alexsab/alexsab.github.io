@@ -3,7 +3,10 @@ name: telegram message
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events
-  [push,pull_request]
+  push:
+    branches: [ * ]
+  pull_request:
+    branches: [ * ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
