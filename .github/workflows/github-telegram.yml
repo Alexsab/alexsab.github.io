@@ -26,7 +26,7 @@ jobs:
 
       - name: Set outputs
         id: commits_list
-        run: echo "::set-output name=full_list::$(git log --pretty=format:'%h - %an, %ar : %s' ${{ github.event.before }}..${{ github.sha }})"
+        run: 'echo "::set-output name=full_list::$(git log --pretty=format:\"%h - %an, %ar : %s\" ${{ github.event.before }}..${{ github.sha }})"'
 
       - name: send default message
         uses: appleboy/telegram-action@master
