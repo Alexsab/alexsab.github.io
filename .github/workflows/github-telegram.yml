@@ -29,6 +29,7 @@ jobs:
 
       - name: Set outputs
         id: commits_list
+        # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
           COMMITS_STRING=$(cat COMMITS_LIST)
           COMMITS_STRING="${COMMITS_STRING//'%'/'%25'}"
