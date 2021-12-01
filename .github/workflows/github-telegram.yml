@@ -22,6 +22,7 @@ jobs:
           # checkout full tree
           fetch-depth: 0
       - run: |
+          git fetch
           echo "$(git branch -v)"
 
       - uses: actions/checkout@v2
@@ -29,6 +30,7 @@ jobs:
           # checkout full tree
           fetch-depth: 0
       - run: |
+          git fetch
           if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             git log --pretty=format:"'\`%h\`' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
           else
