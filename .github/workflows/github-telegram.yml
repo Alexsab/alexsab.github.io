@@ -34,7 +34,7 @@ jobs:
           COMMITS_STRING="${COMMITS_STRING//'%'/'%25'}"
           COMMITS_STRING="${COMMITS_STRING//$'\n'/'%0A'}"
           COMMITS_STRING="${COMMITS_STRING//$'\r'/'%0D'}"
-          echo "::set-output name=full_list::$(cat COMMITS_STRING)"
+          echo "::set-output name=full_list::$COMMITS_STRING"
 
       - name: send default message
         uses: appleboy/telegram-action@master
