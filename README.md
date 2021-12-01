@@ -4,9 +4,3 @@
 test repo
 
 add -100 to channel id in Telegram
-
-1
-2
-3
-4
-5
