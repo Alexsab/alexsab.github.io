@@ -23,11 +23,11 @@ jobs:
           fetch-depth: 0
       - run: |
           if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            git log -5 --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
+            git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
           else
             git fetch origin master
             git checkout master
-            git log -5 --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
+            git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
           fi
 
       - name: Set outputs
@@ -41,7 +41,7 @@ jobs:
             echo "::set-output name=lines_count::$LINES_COUNT new commits"
           fi
 
-          COMMITS_STRING=$(cat COMMITS_LIST)
+          COMMITS_STRING=$(cat COMMITS_LIST | head -n 5)
           COMMITS_STRING="${COMMITS_STRING//'%'/'%25'}"
           COMMITS_STRING="${COMMITS_STRING//$'\n'/'%0A'}"
           COMMITS_STRING="${COMMITS_STRING//$'\r'/'%0D'}"
