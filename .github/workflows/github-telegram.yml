@@ -69,7 +69,7 @@ jobs:
 
             create ${{ github.event.ref }} from ${{ github.event.master_branch }}
 
-            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
+            [See changes](https://github.com/${{ github.repository }}/tree/${{ github.event.ref }}
 
   pull_request:
 
@@ -92,6 +92,8 @@ jobs:
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
             pull request from ${{ github.event.head.ref }} to ${{ github.event.master.ref }}
+
+            [See changes](https://github.com/${{ github.repository }}/tree/${{ github.event.head.ref }}
 
   delete:
 
