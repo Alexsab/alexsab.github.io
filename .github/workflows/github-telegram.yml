@@ -24,6 +24,10 @@ jobs:
         id: vars
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
+      - name: Set outputs
+        id: commits_list
+        run: echo "::set-output name=full_list::$(git log --pretty=format:'%h - %an, %ar : %s' ${{ github.event.before }}..${{ github.sha }})"
+
       - name: send default message
         uses: appleboy/telegram-action@master
         with:
@@ -34,7 +38,7 @@ jobs:
           message: |
             *[${{ github.repository }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
-            \``${{ steps.vars.outputs.sha_short }}`\` ${{ github.event.commits[0].message }} — ${{ github.event.commits[0].author.username }}
+            ${{ steps.commits_list.outputs.full_list }}
 
             [See changes](${{ github.event.commits[0].url }})
           #https://github.com/${{ github.repository }}/commit/${{github.sha}}
