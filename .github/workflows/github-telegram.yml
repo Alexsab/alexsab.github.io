@@ -93,8 +93,6 @@ jobs:
 
             pull request from ${{ github.event.head.ref }} to ${{ github.event.master.ref }}
 
-            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
-
   delete:
 
     if: ${{ github.event.master_branch == null && github.event.commits == null }}
@@ -115,9 +113,7 @@ jobs:
           message: |
             *[${{ github.event.repository.name }}:${{ github.ref_name }}]* by *${{ github.actor }}*:
 
-            ${{ steps.commits_list.outputs.full_list }}
-
-            [See changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }})
+            delete brunch ${{ github.event.ref }}
 
   log-github-event-goodies:
     name: "LOG Everything on GitHub Event"
