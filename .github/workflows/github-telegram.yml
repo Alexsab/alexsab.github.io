@@ -54,10 +54,10 @@ jobs:
             [See changes](${{ github.event.commits[0].url }})
           #https://github.com/${{ github.repository }}/commit/${{github.sha}}
 
-  log-github-event-goodies:
-    name: "LOG Everything on GitHub Event"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Logging
-        run: |
-          echo "${{ toJSON( github.repository ) }}"
+  # log-github-event-goodies:
+  #   name: "LOG Everything on GitHub Event"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Logging
+  #       run: |
+  #         echo "${{ toJSON( github.event ) }}"
