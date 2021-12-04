@@ -17,6 +17,7 @@ jobs:
     steps:
 
       - name: Get commits
+        id: commits
         uses: actions/checkout@v2
         with:
           # checkout full tree
@@ -24,10 +25,12 @@ jobs:
       - run: |
           if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
+            echo "::set-output name=before::"
           else
             git fetch origin master
             git checkout master
             git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
+            echo "::set-output name=before::${{ github.event.before }}.."
           fi
 
       - name: Set outputs
@@ -55,7 +58,7 @@ jobs:
           disable_web_page_preview: true
           format: html
           message: |
-            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ github.event.before }}..${{ github.sha }}">${{ steps.commits_list.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
+            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.commits.outputs.before }}${{ github.sha }}">${{ steps.commits_list.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
 
             ${{ steps.commits_list.outputs.full_list }}
 
