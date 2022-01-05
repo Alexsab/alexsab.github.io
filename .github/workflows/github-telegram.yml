@@ -133,10 +133,10 @@ jobs:
 
             branch '`${{ github.event.ref }}`' is deleted
 
-  log-github-event-goodies:
-    name: "LOG Everything on GitHub Event"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Logging
-        run: |
-          echo "${{ toJSON( github.event ) }}"
+  # log-github-event-goodies:
+  #   name: "LOG Everything on GitHub Event"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Logging
+  #       run: |
+  #         echo "${{ toJSON( github.event ) }}"
