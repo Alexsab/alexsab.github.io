@@ -13,7 +13,7 @@ IFS=$'\n' read -rd '' -a COMMITS_ARRAY <<< "$COMMITS"
 
 # Process each commit
 echo "full_list<<EOF"
-for COMMIT in "${COMMITS_ARRAY[@]}"; do
+echo "$COMMITS" | while read -r COMMIT; do
   echo "$COMMIT"
 done
 echo "EOF"
