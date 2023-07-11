@@ -48,7 +48,7 @@ jobs:
 
       - name: Work with commits
         id: with_commits
-      - run: |
+        run: |
           if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
             git fetch origin master
             git checkout master
