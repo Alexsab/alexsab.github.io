@@ -60,7 +60,7 @@ jobs:
 
           # Process each commit
           echo "full_list<<EOF" >> $GITHUB_OUTPUT
-          for COMMIT in "${COMMITS_ARRAY[@]}"; do
+          echo "$COMMITS" | while read -r COMMIT; do
             echo "$COMMIT" >> $GITHUB_OUTPUT
           done
           echo "EOF" >> $GITHUB_OUTPUT
