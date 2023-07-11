@@ -46,7 +46,6 @@ jobs:
           # checkout full tree
           fetch-depth: 0
       - run: |
-          set -x >&2
           if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
             git fetch origin master
             git checkout master
