@@ -50,24 +50,24 @@ jobs:
             git fetch origin master
             git checkout master
             mapfile -t COMMITS_ARRAY < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }})
-            echo "before=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "before=${{ github.sha }}" >> "$GITHUB_OUTPUT"
           else
             mapfile -t COMMITS_ARRAY < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }})
-            echo "before=${{ github.event.before }}..${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "before=${{ github.event.before }}..${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
           # Process each commit
-          # echo "full_list<<EOF" >> $GITHUB_OUTPUT
+          # echo "full_list<<EOF" >> "$GITHUB_OUTPUT"
           # for COMMIT in "${COMMITS_ARRAY[@]}"; do
-          #   echo "$COMMIT" >> $GITHUB_OUTPUT
+          #   echo "$COMMIT" >> "$GITHUB_OUTPUT"
           # done
-          # echo "EOF" >> $GITHUB_OUTPUT
+          # echo "EOF" >> "$GITHUB_OUTPUT"
 
           LINES_COUNT=${#COMMITS_ARRAY[*]}
           if [ "$LINES_COUNT" == "1" ]; then
-            echo "lines_count=$LINES_COUNT new commit" >> $GITHUB_OUTPUT
+            echo "lines_count=$LINES_COUNT new commit" >> "$GITHUB_OUTPUT"
           else
-            echo "lines_count=$LINES_COUNT new commits" >> $GITHUB_OUTPUT
+            echo "lines_count=$LINES_COUNT new commits" >> "$GITHUB_OUTPUT"
           fi
 
           echo "alexsab:"
@@ -80,11 +80,11 @@ jobs:
         run: |
           additional_text="${{ inputs.additional-text || '' }}"
           if [ "$additional_text" != "" ]; then
-            echo "additional_text<<EOF" >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
-            echo $additional_text >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            echo "additional_text<<EOF" >> "$GITHUB_OUTPUT"
+            echo "" >> "$GITHUB_OUTPUT"
+            echo $additional_text >> "$GITHUB_OUTPUT"
+            echo "" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
           fi
 
           echo "alexsab:"
