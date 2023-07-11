@@ -72,8 +72,8 @@ jobs:
 
           COMMITS_STRING=$(cat COMMITS_LIST | head -n 5)
           COMMITS_STRING="${COMMITS_STRING//'%'/'%25'}"
-          COMMITS_STRING="${COMMITS_STRING//$'\n'/'%0A'}"
           COMMITS_STRING="${COMMITS_STRING//$'\r'/'%0D'}"
+          COMMITS_STRING="${COMMITS_STRING//$'\n'/$'\n'}"
           echo "full_list=$COMMITS_STRING" >> $GITHUB_OUTPUT
 
           additional_text="${{ inputs.additional-text || '' }}"
