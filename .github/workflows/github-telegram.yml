@@ -1,7 +1,30 @@
 name: telegram message
 
 # Controls when the workflow will run
-on: [push, pull_request, create, delete, issues]
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  create: {}
+  delete: {}
+  issues: {}
+  workflow_call:
+    inputs:
+      additional-text:
+        description: 'Additional text passed from the caller workflow'
+        required: false
+        type: string
+    secrets:
+      TELEGRAM_TO:
+        description: 'Telegram ID passed from the caller workflow'
+        required: true
+      TELEGRAM_TOKEN:
+        description: 'Telegram token passed from the caller workflow'
+        required: true
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -18,15 +41,15 @@ jobs:
 
       - name: Get commits
         id: commits
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # checkout full tree
           fetch-depth: 0
       - run: |
           if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
-            git fetch origin ${{ github.event.repository.default_branch }}
-            git checkout ${{ github.event.repository.default_branch }}
-            git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.repository.default_branch }}..${{ github.sha }} > COMMITS_LIST
+            git fetch origin master
+            git checkout master
+            git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
           else
             git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
           fi
@@ -37,21 +60,30 @@ jobs:
         run: |
           LINES_COUNT=$(grep -c ".*" COMMITS_LIST)
           if [ "$LINES_COUNT" == "1" ]; then
-            echo "::set-output name=lines_count::$LINES_COUNT new commit"
+            echo "lines_count=$LINES_COUNT new commit" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=lines_count::$LINES_COUNT new commits"
+            echo "lines_count=$LINES_COUNT new commits" >> $GITHUB_OUTPUT
           fi
           if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
-            echo "::set-output name=before::${{ github.sha }}"
+            echo "before=${{ github.sha }}" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=before::${{ github.event.before }}..${{ github.sha }}"
+            echo "before=${{ github.event.before }}..${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
           COMMITS_STRING=$(cat COMMITS_LIST | head -n 5)
           COMMITS_STRING="${COMMITS_STRING//'%'/'%25'}"
           COMMITS_STRING="${COMMITS_STRING//$'\n'/'%0A'}"
           COMMITS_STRING="${COMMITS_STRING//$'\r'/'%0D'}"
-          echo "::set-output name=full_list::$COMMITS_STRING"
+          echo "full_list=$COMMITS_STRING" >> $GITHUB_OUTPUT
+
+          additional_text="${{ inputs.additional-text || '' }}"
+          if [ "$additional_text" != "" ]; then
+            echo "additional_text<<EOF" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            echo $additional_text >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
 
       - name: Send message to Telegram
         uses: appleboy/telegram-action@master
@@ -62,7 +94,7 @@ jobs:
           format: html
           message: |
             <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.commits_list.outputs.before }}">${{ steps.commits_list.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
-
+            ${{ steps.commits_list.outputs.additional_text }}
             ${{ steps.commits_list.outputs.full_list }}
 
 
