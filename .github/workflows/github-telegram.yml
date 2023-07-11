@@ -71,6 +71,7 @@ jobs:
             echo "lines_count=$LINES_COUNT new commits" >> $GITHUB_OUTPUT
           fi
 
+          echo "alexsab:"
           echo "The output file contains 1: $(cat $GITHUB_OUTPUT)"
 
 
@@ -87,7 +88,11 @@ jobs:
             echo "EOF" >> $GITHUB_OUTPUT
           fi
 
+          echo "alexsab:"
           echo "The output file contains 2: $(cat $GITHUB_OUTPUT)"
+          echo "The before 2: ${{ steps.commits.outputs.before }}"
+          echo "The lines_count 2: ${{ steps.commits.outputs.lines_count }}"
+          echo "The full_list 2: ${{ steps.commits.outputs.full_list }}"
 
       - name: Send message to Telegram
         uses: appleboy/telegram-action@master
