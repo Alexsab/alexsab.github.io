@@ -40,7 +40,7 @@ jobs:
     steps:
 
       - name: Get commits
-        id: commits
+        id: get_commits
         uses: actions/checkout@v3
         with:
           # checkout full tree
@@ -57,11 +57,11 @@ jobs:
           fi
 
           # Process each commit
-          echo "full_list<<EOF" >> $GITHUB_OUTPUT
-          for COMMIT in "${COMMITS_ARRAY[@]}"; do
-            echo "$COMMIT" >> $GITHUB_OUTPUT
-          done
-          echo "EOF" >> $GITHUB_OUTPUT
+          # echo "full_list<<EOF" >> $GITHUB_OUTPUT
+          # for COMMIT in "${COMMITS_ARRAY[@]}"; do
+          #   echo "$COMMIT" >> $GITHUB_OUTPUT
+          # done
+          # echo "EOF" >> $GITHUB_OUTPUT
 
           LINES_COUNT=${#COMMITS_ARRAY[*]}
           if [ "$LINES_COUNT" == "1" ]; then
@@ -75,7 +75,7 @@ jobs:
 
 
       - name: Set outputs
-        id: outputs
+        id: set_outputs
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
           additional_text="${{ inputs.additional-text || '' }}"
@@ -89,11 +89,12 @@ jobs:
 
           echo "alexsab:"
           echo "The output file contains 2: $(cat $GITHUB_OUTPUT)"
-          echo "The before 2: ${{ steps.commits.outputs.before }}"
-          echo "The lines_count 2: ${{ steps.commits.outputs.lines_count }}"
-          echo "The full_list 2: ${{ steps.commits.outputs.full_list }}"
+          echo "The before 2: ${{ steps.get_commits.outputs.before }}"
+          echo "The lines_count 2: ${{ steps.get_commits.outputs.lines_count }}"
+          echo "The full_list 2: ${{ steps.get_commits.outputs.full_list }}"
 
       - name: Send message to Telegram
+        if: ${{ steps.get_commits.outputs.full_list != '' }}
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -101,9 +102,9 @@ jobs:
           disable_web_page_preview: true
           format: html
           message: |
-            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.commits.outputs.before }}">${{ steps.commits.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
-            ${{ steps.outputs.outputs.additional_text }}
-            ${{ steps.commits.outputs.full_list }}
+            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.get_commits.outputs.before }}">${{ steps.get_commits.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
+            ${{ steps.set_outputs.outputs.additional_text }}
+            ${{ steps.get_commits.outputs.full_list }}
 
 
   create:
