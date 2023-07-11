@@ -49,33 +49,35 @@ jobs:
           if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
             git fetch origin master
             git checkout master
-            git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }} > COMMITS_LIST
+            COMMITS=$(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }})
+            echo "before=${{ github.sha }}" >> $GITHUB_OUTPUT
           else
-            git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }} > COMMITS_LIST
+            COMMITS=$(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }})
+            echo "before=${{ github.event.before }}..${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Set outputs
-        id: commits_list
-        # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
-        run: |
-          LINES_COUNT=$(grep -c ".*" COMMITS_LIST)
+          # Convert the list of commits to an array
+          IFS=$'\n' read -rd '' -a COMMITS_ARRAY <<< "$COMMITS"
+
+          # Process each commit
+          echo "full_list<<EOF" >> $GITHUB_OUTPUT
+          for COMMIT in "${COMMITS_ARRAY[@]}"; do
+            echo "$COMMIT" >> $GITHUB_OUTPUT
+          done
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          LINES_COUNT=${#COMMITS_ARRAY[*]}
           if [ "$LINES_COUNT" == "1" ]; then
             echo "lines_count=$LINES_COUNT new commit" >> $GITHUB_OUTPUT
           else
             echo "lines_count=$LINES_COUNT new commits" >> $GITHUB_OUTPUT
           fi
-          if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
-            echo "before=${{ github.sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "before=${{ github.event.before }}..${{ github.sha }}" >> $GITHUB_OUTPUT
-          fi
 
-          COMMITS_STRING=$(cat COMMITS_LIST | head -n 5)
-          COMMITS_STRING="${COMMITS_STRING//'%'/'%25'}"
-          COMMITS_STRING="${COMMITS_STRING//$'\r'/'%0D'}"
-          COMMITS_STRING="${COMMITS_STRING//$'\n'/$'\n'}"
-          echo "full_list=$COMMITS_STRING" >> $GITHUB_OUTPUT
 
+      - name: Set outputs
+        id: outputs
+        # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
+        run: |
           additional_text="${{ inputs.additional-text || '' }}"
           if [ "$additional_text" != "" ]; then
             echo "additional_text<<EOF" >> $GITHUB_OUTPUT
@@ -93,9 +95,9 @@ jobs:
           disable_web_page_preview: true
           format: html
           message: |
-            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.commits_list.outputs.before }}">${{ steps.commits_list.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
-            ${{ steps.commits_list.outputs.additional_text }}
-            ${{ steps.commits_list.outputs.full_list }}
+            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.commits.outputs.before }}">${{ steps.commits.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
+            ${{ steps.outputs.outputs.additional_text }}
+            ${{ steps.commits.outputs.full_list }}
 
 
   create:
