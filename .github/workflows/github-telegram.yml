@@ -71,6 +71,8 @@ jobs:
             echo "lines_count=$LINES_COUNT new commits" >> $GITHUB_OUTPUT
           fi
 
+          echo "The output file contains 1: $(cat $GITHUB_OUTPUT)"
+
 
       - name: Set outputs
         id: outputs
@@ -84,6 +86,8 @@ jobs:
             echo "" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
+
+          echo "The output file contains 2: $(cat $GITHUB_OUTPUT)"
 
       - name: Send message to Telegram
         uses: appleboy/telegram-action@master
