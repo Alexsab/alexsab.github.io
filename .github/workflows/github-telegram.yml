@@ -59,12 +59,12 @@ jobs:
             echo "before=${{ github.event.before }}..${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
-          # Process each commit
-          # echo "full_list<<EOF" >> "$GITHUB_OUTPUT"
-          # for COMMIT in "${COMMITS_ARRAY[@]}"; do
-          #   echo "$COMMIT" >> "$GITHUB_OUTPUT"
-          # done
-          # echo "EOF" >> "$GITHUB_OUTPUT"
+          Process each commit
+          echo "full_list<<EOF" >> "$GITHUB_OUTPUT"
+          for COMMIT in "${COMMITS_ARRAY[@]}"; do
+            echo "$COMMIT" >> "$GITHUB_OUTPUT"
+          done
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
           LINES_COUNT=${#COMMITS_ARRAY[*]}
           if [ "$LINES_COUNT" == "1" ]; then
@@ -72,9 +72,6 @@ jobs:
           else
             echo "lines_count=$LINES_COUNT new commits" >> "$GITHUB_OUTPUT"
           fi
-
-          echo "alexsab:"
-          echo "The output file contains 1: $(cat $GITHUB_OUTPUT)"
 
 
       - name: Set outputs
@@ -89,12 +86,6 @@ jobs:
             echo "" >> "$GITHUB_OUTPUT"
             echo "EOF" >> "$GITHUB_OUTPUT"
           fi
-
-          echo "alexsab:"
-          echo "The output file contains 2: $(cat $GITHUB_OUTPUT)"
-          echo "The before 2: ${{ steps.with_commits.outputs.before }}"
-          echo "The lines_count 2: ${{ steps.with_commits.outputs.lines_count }}"
-          echo "The full_list 2: ${{ steps.with_commits.outputs.full_list }}"
 
       - name: Send message to Telegram
         if: ${{ steps.with_commits.outputs.full_list != '' }}
