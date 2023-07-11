@@ -50,17 +50,16 @@ jobs:
           if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
             git fetch origin master
             git checkout master
-            COMMITS=$(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }})
+            mapfile -t COMMITS_ARRAY < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" master..${{ github.sha }})
+            echo "before=${{ github.sha }}" >> $GITHUB_OUTPUT
           else
-            COMMITS=$(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }})
+            mapfile -t COMMITS_ARRAY < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" ${{ github.event.before }}..${{ github.sha }})
+            echo "before=${{ github.event.before }}..${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
-
-          # Convert the list of commits to an array
-          IFS=$'\n' read -rd '' -a COMMITS_ARRAY <<< "$COMMITS"
 
           # Process each commit
           echo "full_list<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMITS" | while read -r COMMIT; do
+          for COMMIT in "${COMMITS_ARRAY[@]}"; do
             echo "$COMMIT" >> $GITHUB_OUTPUT
           done
           echo "EOF" >> $GITHUB_OUTPUT
@@ -70,12 +69,6 @@ jobs:
             echo "lines_count=$LINES_COUNT new commit" >> $GITHUB_OUTPUT
           else
             echo "lines_count=$LINES_COUNT new commits" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
-            echo "before=${{ github.sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "before=${{ github.event.before }}..${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
 
