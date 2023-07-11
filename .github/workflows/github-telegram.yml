@@ -45,6 +45,9 @@ jobs:
         with:
           # checkout full tree
           fetch-depth: 0
+
+      - name: Work with commits
+        id: with_commits
       - run: |
           if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
             git fetch origin master
@@ -89,12 +92,12 @@ jobs:
 
           echo "alexsab:"
           echo "The output file contains 2: $(cat $GITHUB_OUTPUT)"
-          echo "The before 2: ${{ steps.get_commits.outputs.before }}"
-          echo "The lines_count 2: ${{ steps.get_commits.outputs.lines_count }}"
-          echo "The full_list 2: ${{ steps.get_commits.outputs.full_list }}"
+          echo "The before 2: ${{ steps.with_commits.outputs.before }}"
+          echo "The lines_count 2: ${{ steps.with_commits.outputs.lines_count }}"
+          echo "The full_list 2: ${{ steps.with_commits.outputs.full_list }}"
 
       - name: Send message to Telegram
-        if: ${{ steps.get_commits.outputs.full_list != '' }}
+        if: ${{ steps.with_commits.outputs.full_list != '' }}
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
@@ -102,9 +105,9 @@ jobs:
           disable_web_page_preview: true
           format: html
           message: |
-            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.get_commits.outputs.before }}">${{ steps.get_commits.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
+            <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/compare/${{ steps.with_commits.outputs.before }}">${{ steps.with_commits.outputs.lines_count }}</a></b> by <b><a href="https://github.com/${{ github.actor }}">${{ github.actor }}</a></b>
             ${{ steps.set_outputs.outputs.additional_text }}
-            ${{ steps.get_commits.outputs.full_list }}
+            ${{ steps.with_commits.outputs.full_list }}
 
 
   create:
