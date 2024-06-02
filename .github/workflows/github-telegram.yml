@@ -192,9 +192,10 @@ jobs:
         id: set_outputs
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
-          additional_text="${{ inputs.additional-text || '' }}"
-          echo additional_text: $additional_text
           echo additional-text: ${{ inputs.additional-text || '' }}
+          echo base64: $(echo "${{ inputs.additional-text }}" | base64 -d)
+          additional_text=$(echo "${{ inputs.additional-text }}" | base64 -d)
+          echo additional_text: $additional_text
           if [ "$additional_text" != "" ]; then
             echo "additional_text<<EOF" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
@@ -202,6 +203,7 @@ jobs:
             echo "" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
+          echo $GITHUB_OUTPUT
 
       - name: Send message to Telegram
         if: ${{ steps.get_commits.outputs.hash != '' }}
