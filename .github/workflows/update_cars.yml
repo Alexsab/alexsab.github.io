@@ -77,7 +77,7 @@ jobs:
     uses: ./.github/workflows/github-telegram.yml
     with:
       additional-text: |
-        ${{ needs.build.outputs.script_output }}
+        <pre>$(echo "${{ needs.build.outputs.script_output }}" | base64 -d)</pre>
     secrets:
       TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
