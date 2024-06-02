@@ -194,21 +194,8 @@ jobs:
         run: |
           additional_text="Error: Model 'Emgrand, II' or Color 'Серый' not found\nError: Model 'Emgrand, II' or Color 'Желтый' not found\nError: Model 'Emgrand, II' or Color 'Желтый' not found"
           if [ "$additional_text" != "" ]; then
-            # Debug: print the original text
-            echo "Original additional_text:"
-            echo -e "$additional_text"  # use echo -e to interpret \n
-            
-            # Разбиваем строку на массив по символу \n
-            IFS=$'\n' read -r -d '' -a lines <<< "$(echo -e "$additional_text")"
-            
-            # Debug: print the array
-            echo "Array elements:"
-            for line in "${lines[@]}"; do
-              echo "$line"
-            done
-            
-            # Объединяем массив строк в одну строку с реальными переносами
-            formatted_text=$(printf "%s\n" "${lines[@]}")
+            # Форматируем текст с переносами строк
+            formatted_text=$(echo -e "$additional_text")
             
             # Debug: print the formatted text
             echo "Formatted additional_text:"
