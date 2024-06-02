@@ -25,9 +25,10 @@ jobs:
       id: set_output
       run: |
         if [ -f output.txt ]; then
-          echo "script_output=$(<output.txt)"
-          echo "script_output=$(<output.txt)" >> $GITHUB_ENV
-          echo "script_output=$(<output.txt)" >> $GITHUB_OUTPUT
+          # Кодируем содержимое файла в base64
+          encoded_output=$(base64 -w 0 output.txt)
+          # Передаем закодированное значение
+          echo "script_output=$encoded_output" >> $GITHUB_OUTPUT
         fi
 
     - name: cat output

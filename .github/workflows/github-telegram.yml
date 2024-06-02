@@ -197,6 +197,7 @@ jobs:
             encoded_ex_text=$(echo -e "$ex_text" | base64 -w 0)
             echo "ex_text=$encoded_ex_text" >> $GITHUB_OUTPUT
           fi
+          echo ex_textе=$ex_text >> $GITHUB_OUTPUT
           echo encoded_ex_text: $encoded_ex_text
           echo additional-text: ${{ inputs.additional-text || '' }}
           echo base64: $(echo "${{ inputs.additional-text }}" | base64 -d)
@@ -229,6 +230,8 @@ jobs:
             <pre>${{ steps.set_outputs.outputs.additional_text }}</pre>
             <pre>${{ inputs.additional-text || '' }}</pre>
             <pre>${{ steps.set_outputs.outputs.script_output }}</pre>
+            <pre>${{ steps.set_outputs.outputs.ex_text }}</pre>
+            <pre>${{ steps.set_outputs.outputs.ex_textе }}</pre>
             ${{ steps.get_commits.outputs.message }}
 
 
