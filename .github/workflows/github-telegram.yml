@@ -198,7 +198,7 @@ jobs:
             encoded_ex_text=$(echo -e "$ex_text" | base64 -w 0)
             echo "ex_text=$encoded_ex_text" >> $GITHUB_OUTPUT
           fi
-          echo encoded_ex_text: encoded_ex_text
+          echo encoded_ex_text: $encoded_ex_text
           echo additional-text: ${{ inputs.additional-text || '' }}
           echo base64: $(echo "${{ inputs.additional-text }}" | base64 -d)
           additional_text=$(echo "${{ inputs.additional-text }}" | base64 -d)
