@@ -198,10 +198,10 @@ jobs:
             # Разбиваем строку на массив по символу \n
             IFS=$'\n' read -r -d '' -a lines <<< "$additional_text"
             # Объединяем массив строк в одну строку с реальными переносами
-            formatted_text=$(printf "%s\n" "${lines[@]}")
+            # formatted_text=$(printf "%s\n" "${lines[@]}")
             echo "formatted_text<<EOF" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
-            echo $formatted_text >> $GITHUB_OUTPUT
+            echo $(printf "%s\n" "${lines[@]}") >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
