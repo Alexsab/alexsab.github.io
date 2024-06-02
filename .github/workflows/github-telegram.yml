@@ -203,7 +203,9 @@ jobs:
             
             echo "additional_text<<EOF" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
+            echo "<pre>" >> $GITHUB_OUTPUT
             echo "$additional_text" >> $GITHUB_OUTPUT
+            echo "</pre>" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
@@ -218,7 +220,7 @@ jobs:
           format: html
           message: |
             <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/commit/${{ steps.get_commits.outputs.hash }}">Last commit</a></b> by <b>${{ steps.get_commits.outputs.author }}</b>
-            <pre>${{ steps.set_outputs.outputs.additional_text }}</pre>
+            ${{ steps.set_outputs.outputs.additional_text }}
             ${{ steps.get_commits.outputs.message }}
 
 
