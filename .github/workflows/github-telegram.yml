@@ -192,6 +192,13 @@ jobs:
         id: set_outputs
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
+          ex_text="Error: Model 'Emgrand, II' or Color 'Серый' not found\n \
+                  \nError: Model 'Emgrand, II' or Color 'Желтый' not found"
+          if [ "$ex_text" != "" ]; then
+            encoded_ex_text=$(echo -e "$ex_text" | base64 -w 0)
+            echo "ex_text=$encoded_ex_text" >> $GITHUB_OUTPUT
+          fi
+          echo encoded_ex_text: encoded_ex_text
           echo additional-text: ${{ inputs.additional-text || '' }}
           echo base64: $(echo "${{ inputs.additional-text }}" | base64 -d)
           additional_text=$(echo "${{ inputs.additional-text }}" | base64 -d)
@@ -205,6 +212,10 @@ jobs:
           fi
           echo $GITHUB_OUTPUT
 
+          if [ -f output.txt ]; then          
+            echo encoded_output=$(base64 -w 0 output.txt)
+          fi
+  
       - name: Send message to Telegram
         if: ${{ steps.get_commits.outputs.hash != '' }}
         uses: appleboy/telegram-action@master
