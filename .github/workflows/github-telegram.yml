@@ -195,8 +195,10 @@ jobs:
           additional_text=$(echo "${{ inputs.additional-text }}" | base64 -d)
           echo additional_text: $additional_text
           if [ "$additional_text" != "" ]; then
-            formatted_text=$(echo "$additional_text" | sed 's/\\n/\
-            /g')
+            # Разбиваем строку на массив по символу \n
+            IFS=$'\n' read -r -d '' -a lines <<< "$additional_text"
+            # Объединяем массив строк в одну строку с реальными переносами
+            formatted_text=$(printf "%s\n" "${lines[@]}")
             echo "formatted_text<<EOF" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
             echo $formatted_text >> $GITHUB_OUTPUT
@@ -214,7 +216,7 @@ jobs:
           format: html
           message: |
             <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/commit/${{ steps.get_commits.outputs.hash }}">Last commit</a></b> by <b>${{ steps.get_commits.outputs.author }}</b>
-            ${{ steps.set_outputs.outputs.formatted_text }}
+            <pre>${{ steps.set_outputs.outputs.formatted_text }}</pre>
             ${{ steps.get_commits.outputs.message }}
 
 
