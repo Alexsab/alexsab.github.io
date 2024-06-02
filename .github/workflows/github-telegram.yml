@@ -213,7 +213,7 @@ jobs:
           format: html
           message: |
             <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/commit/${{ steps.get_commits.outputs.hash }}">Last commit</a></b> by <b>${{ steps.get_commits.outputs.author }}</b>
-            <pre>${{ steps.set_outputs.outputs.formatted_text }}</pre>
+            ${{ steps.set_outputs.outputs.formatted_text }}
             ${{ steps.get_commits.outputs.message }}
 
 
