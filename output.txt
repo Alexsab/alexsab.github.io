@@ -1,2 +1,1 @@
-Error: Model 'Emgrand, II' or Color 'Серый' not found
-Error: Model 'Emgrand, II' or Color 'Желтый' not found
+Error: Model 'Emgrand, II' or Color 'Серый' not found\nError: Model 'Emgrand, II' or Color 'Желтый' not found
