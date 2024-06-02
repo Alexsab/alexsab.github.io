@@ -210,12 +210,6 @@ jobs:
             echo "" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
-          echo $GITHUB_OUTPUT
-
-          if [ -f output.txt ]; then
-            echo "script_output=$(<output.txt)"
-            echo "script_output=\"$(<output.txt)\"" >> $GITHUB_OUTPUT
-          fi
   
       - name: Send message to Telegram
         if: ${{ steps.get_commits.outputs.hash != '' }}
@@ -229,7 +223,6 @@ jobs:
             <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/commit/${{ steps.get_commits.outputs.hash }}">Last commit</a></b> by <b>${{ steps.get_commits.outputs.author }}</b>
             <pre>${{ steps.set_outputs.outputs.additional_text }}</pre>
             <pre>${{ inputs.additional-text || '' }}</pre>
-            <pre>${{ steps.set_outputs.outputs.script_output }}</pre>
             <pre>${{ steps.set_outputs.outputs.ex_text }}</pre>
             <pre>${{ steps.set_outputs.outputs.ex_textt }}</pre>
             ${{ steps.get_commits.outputs.message }}
