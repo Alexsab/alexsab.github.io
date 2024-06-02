@@ -196,10 +196,10 @@ jobs:
           if [ "$additional_text" != "" ]; then
             # Debug: print the original text
             echo "Original additional_text:"
-            echo "$additional_text"
+            echo -e "$additional_text"  # use echo -e to interpret \n
             
             # Разбиваем строку на массив по символу \n
-            IFS=$'\n' read -r -a lines <<< "$additional_text"
+            IFS=$'\n' read -r -d '' -a lines <<< "$(echo -e "$additional_text")"
             
             # Debug: print the array
             echo "Array elements:"
