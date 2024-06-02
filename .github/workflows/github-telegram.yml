@@ -192,21 +192,13 @@ jobs:
         id: set_outputs
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
-          ex_text="Error: Model 'Emgrand, II' or Color 'Серый' not found\n\nError: Model 'Emgrand, II' or Color 'Желтый' not found"
-          if [ "$ex_text" != "" ]; then
-            encoded_ex_text=$(echo -e "$ex_text" | base64 -w 0)
-            echo "ex_text=$encoded_ex_text" >> $GITHUB_OUTPUT
-          fi
-          echo ex_textе=$ex_text >> $GITHUB_OUTPUT
-          echo encoded_ex_text: $encoded_ex_text
-          echo additional-text: ${{ inputs.additional-text || '' }}
-          echo base64: $(echo "${{ inputs.additional-text }}" | base64 -d)
           additional_text=$(echo "${{ inputs.additional-text }}" | base64 -d)
           echo additional_text: $additional_text
           if [ "$additional_text" != "" ]; then
-            echo "additional_text<<EOF" >> $GITHUB_OUTPUT
+            formatted_text=$(echo -e "$additional_text" | sed ':a;N;$!ba;s/\\n/\n/g')
+            echo "formatted_text<<EOF" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
-            echo $additional_text >> $GITHUB_OUTPUT
+            echo $formatted_text >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
@@ -221,10 +213,7 @@ jobs:
           format: html
           message: |
             <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/commit/${{ steps.get_commits.outputs.hash }}">Last commit</a></b> by <b>${{ steps.get_commits.outputs.author }}</b>
-            <pre>${{ steps.set_outputs.outputs.additional_text }}</pre>
-            <pre>${{ inputs.additional-text || '' }}</pre>
-            <pre>${{ steps.set_outputs.outputs.ex_text }}</pre>
-            <pre>${{ steps.set_outputs.outputs.ex_textt }}</pre>
+            <pre>${{ steps.set_outputs.outputs.formatted_text }}</pre>
             ${{ steps.get_commits.outputs.message }}
 
 
