@@ -193,13 +193,9 @@ jobs:
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
           additional_text="${{ inputs.additional-text || '' }}"
-          echo $additional_text
           if [ "$additional_text" != "" ]; then
-            echo "additional_text<<EOF" >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
-            echo $additional_text >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            encoded_additional_text=$(echo "$additional_text" | base64 -w 0)
+            echo "additional_text=$additional_text" >> $GITHUB_OUTPUT
           fi
 
       - name: Send message to Telegram
@@ -212,7 +208,7 @@ jobs:
           format: html
           message: |
             <b>[${{ github.event.repository.name }}:${{ github.ref_name }}]</b> <b><a href="https://github.com/${{ github.repository }}/commit/${{ steps.get_commits.outputs.hash }}">Last commit</a></b> by <b>${{ steps.get_commits.outputs.author }}</b>
-            ${{ steps.set_outputs.outputs.additional_text }}
+            <pre>$(echo "${{ steps.set_outputs.outputs.additional_text }}" | base64 -d | sed 's/$/<br>/')</pre>
             ${{ steps.get_commits.outputs.message }}
 
 
