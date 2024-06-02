@@ -193,7 +193,7 @@ jobs:
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
           additional_text="${{ inputs.additional-text || '' }}"
-          echo additional_text
+          echo $additional_text
           if [ "$additional_text" != "" ]; then
             echo "additional_text<<EOF" >> $GITHUB_OUTPUT
             echo "" >> $GITHUB_OUTPUT
