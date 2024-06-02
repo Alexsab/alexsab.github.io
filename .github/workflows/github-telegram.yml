@@ -192,9 +192,7 @@ jobs:
         id: set_outputs
         # The part of this solution to focus on is that we’re substituting the %, \n, and \r characters
         run: |
-          # additional_text=$(echo "${{ inputs.additional-text }}" | base64 -d)
-          additional_text="asd\nzxc\nqwe"
-          echo additional_text: $additional_text
+          additional_text="Error: Model 'Emgrand, II' or Color 'Серый' not found\nError: Model 'Emgrand, II' or Color 'Желтый' not found\nError: Model 'Emgrand, II' or Color 'Желтый' not found"
           if [ "$additional_text" != "" ]; then
             # Debug: print the original text
             echo "Original additional_text:"
