@@ -195,14 +195,28 @@ jobs:
           additional_text=$(echo "${{ inputs.additional-text }}" | base64 -d)
           echo additional_text: $additional_text
           if [ "$additional_text" != "" ]; then
+            # Debug: print the original text
+            echo "Original additional_text:"
+            echo "$additional_text"
+            
             # Разбиваем строку на массив по символу \n
-            IFS=$'\n' read -r -d '' -a lines <<< "$additional_text"
+            IFS=$'\n' read -r -a lines <<< "$additional_text"
+            
+            # Debug: print the array
+            echo "Array elements:"
+            for line in "${lines[@]}"; do
+              echo "$line"
+            done
+            
             # Объединяем массив строк в одну строку с реальными переносами
-            # formatted_text=$(printf "%s\n" "${lines[@]}")
+            formatted_text=$(printf "%s\n" "${lines[@]}")
+            
+            # Debug: print the formatted text
+            echo "Formatted additional_text:"
+            echo "$formatted_text"
+            
             echo "formatted_text<<EOF" >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
-            echo $(printf "%s\n" "${lines[@]}") >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
+            echo "$formatted_text" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
   
