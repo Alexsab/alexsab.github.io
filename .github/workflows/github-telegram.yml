@@ -103,10 +103,12 @@ jobs:
             PARTS+=("$CHUNK")
           fi
 
-          # Записываем части в выходные данные
+          # Создаем временную директорию для сообщений
+          mkdir -p ./tmp_messages
+
+          # Записываем части в отдельные файлы
           for INDEX in "${!PARTS[@]}"; do
-            # Сохраняем каждую часть как отдельный output без EOF маркеров
-            echo "message_${INDEX}=${PARTS[$INDEX]}" >> $GITHUB_OUTPUT
+            echo "${PARTS[$INDEX]}" > "./tmp_messages/part_${INDEX}.txt"
           done
           echo "total_parts=${#PARTS[@]}" >> $GITHUB_OUTPUT
 
@@ -114,12 +116,12 @@ jobs:
         if: ${{ steps.with_commits.outputs.total_parts != '' }}
         run: |
           for i in $(seq 0 $((${{ steps.with_commits.outputs.total_parts }} - 1))); do
-            MESSAGE_VAR="message_${i}"
+            MESSAGE=$(cat "./tmp_messages/part_${i}.txt" | tr '\n' ' ')
             echo "Sending part $i to Telegram"
             curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
               -d chat_id="${{ secrets.TELEGRAM_TO }}" \
               -d parse_mode="HTML" \
-              -d text="${{ steps.with_commits.outputs[format('{0}', MESSAGE_VAR)] }}" \
+              -d text="$MESSAGE" \
               -d disable_web_page_preview="true"
           done
 
