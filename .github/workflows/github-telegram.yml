@@ -105,42 +105,21 @@ jobs:
 
           # Записываем части в выходные данные
           for INDEX in "${!PARTS[@]}"; do
-            echo "part_$INDEX<<EOF" >> $GITHUB_OUTPUT
-            echo "${PARTS[$INDEX]}" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            # Сохраняем каждую часть как отдельный output без EOF маркеров
+            echo "message_${INDEX}=${PARTS[$INDEX]}" >> $GITHUB_OUTPUT
           done
           echo "total_parts=${#PARTS[@]}" >> $GITHUB_OUTPUT
-          echo $GITHUB_OUTPUT
 
       - name: Send messages to Telegram
         if: ${{ steps.with_commits.outputs.total_parts != '' }}
         run: |
-          # Выведем все outputs для отладки
-          echo "All outputs:"
-          echo "${{ steps.with_commits.outputs }}"
-          echo "---"
-          
           for i in $(seq 0 $((${{ steps.with_commits.outputs.total_parts }} - 1))); do
-            PART_NAME="part_${i}"
-            echo "Looking for part: $PART_NAME"
-            
-            # Сохраним весь вывод grep в переменную и выведем его
-            GREP_OUTPUT=$(echo "${{ steps.with_commits.outputs }}" | grep -A2 "^${PART_NAME}<<EOF$")
-            echo "Grep output:"
-            echo "$GREP_OUTPUT"
-            echo "---"
-            
-            # Получаем сообщение с измененным способом извлечения контента
-            MESSAGE=$(echo "${{ steps.with_commits.outputs }}" | sed -n "/^${PART_NAME}<<EOF$/,/^EOF$/p" | grep -v "EOF")
-            echo "Message content:"
-            echo "$MESSAGE"
-            echo "---"
-            
+            MESSAGE_VAR="message_${i}"
             echo "Sending part $i to Telegram"
-            curl -v -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
               -d chat_id="${{ secrets.TELEGRAM_TO }}" \
               -d parse_mode="HTML" \
-              -d text="$MESSAGE" \
+              -d text="${{ steps.with_commits.outputs[format('{0}', MESSAGE_VAR)] }}" \
               -d disable_web_page_preview="true"
           done
 
