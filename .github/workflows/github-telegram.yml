@@ -87,9 +87,9 @@ jobs:
 
           for COMMIT in "${COMMITS_ARRAY[@]}"; do
             if [ $COUNT -eq 0 ]; then
-              CHUNK="$HEADER\n\n"
+              CHUNK="$HEADER<br><br>"
             fi
-            CHUNK+="$COMMIT\n"
+            CHUNK+="$COMMIT<br>"
             COUNT=$((COUNT + 1))
             
             if [ $COUNT -eq $MAX_COMMITS ]; then
