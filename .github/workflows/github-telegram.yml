@@ -115,13 +115,29 @@ jobs:
       - name: Send messages to Telegram
         if: ${{ steps.with_commits.outputs.total_parts != '' }}
         run: |
+          # Выведем все outputs для отладки
+          echo "All outputs:"
+          echo "${{ steps.with_commits.outputs }}"
+          echo "---"
+          
           for i in $(seq 0 $((${{ steps.with_commits.outputs.total_parts }} - 1))); do
-            # Используем format для создания имени переменной
             PART_NAME="part_${i}"
-            MESSAGE=$(echo "${{ steps.with_commits.outputs }}" | grep "^${PART_NAME}<<EOF$" -A1 | tail -n1 | tr '\n' ' ')
+            echo "Looking for part: $PART_NAME"
+            
+            # Сохраним весь вывод grep в переменную и выведем его
+            GREP_OUTPUT=$(echo "${{ steps.with_commits.outputs }}" | grep -A2 "^${PART_NAME}<<EOF$")
+            echo "Grep output:"
+            echo "$GREP_OUTPUT"
+            echo "---"
+            
+            # Получаем сообщение с измененным способом извлечения контента
+            MESSAGE=$(echo "${{ steps.with_commits.outputs }}" | sed -n "/^${PART_NAME}<<EOF$/,/^EOF$/p" | grep -v "EOF")
+            echo "Message content:"
+            echo "$MESSAGE"
+            echo "---"
+            
             echo "Sending part $i to Telegram"
-            echo $MESSAGE
-            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+            curl -v -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
               -d chat_id="${{ secrets.TELEGRAM_TO }}" \
               -d parse_mode="HTML" \
               -d text="$MESSAGE" \
