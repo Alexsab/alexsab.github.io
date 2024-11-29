@@ -3,8 +3,8 @@ name: Generate Astro Files from XML
 on:
   # schedule:
     # - cron: '0 */4 * * *'  # Запускается каждые 4 часа
-  push:
-    paths:
+  # push:
+    # paths:
       # - '.github/workflows/github-telegram.yml'
       # - 'output.txt'
   workflow_dispatch:
