@@ -110,6 +110,7 @@ jobs:
             echo "EOF" >> $GITHUB_OUTPUT
           done
           echo "total_parts=${#PARTS[@]}" >> $GITHUB_OUTPUT
+          echo $GITHUB_OUTPUT
 
       - name: Send messages to Telegram
         if: ${{ steps.with_commits.outputs.total_parts != '' }}
@@ -119,6 +120,7 @@ jobs:
             PART_NAME="part_${i}"
             MESSAGE=$(echo "${{ steps.with_commits.outputs }}" | grep "^${PART_NAME}<<EOF$" -A1 | tail -n1 | tr '\n' ' ')
             echo "Sending part $i to Telegram"
+            echo $MESSAGE
             curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
               -d chat_id="${{ secrets.TELEGRAM_TO }}" \
               -d parse_mode="HTML" \
@@ -248,10 +250,10 @@ jobs:
             ${{ steps.get_commits.outputs.message }}
 
 
-  # log-github-event-goodies:
-  #   name: "LOG Everything on GitHub Event"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Logging
-  #       run: |
-  #         echo "${{ toJSON( github.event ) }}"
+  log-github-event-goodies:
+    name: "LOG Everything on GitHub Event"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Logging
+        run: |
+          echo "${{ toJSON( github.event ) }}"
