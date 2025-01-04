@@ -54,25 +54,25 @@ prepare_commits() {
 
     # Разбиваем коммиты на части по 40 штук
     PART_INDEX=0
-    CHUNK="$HEADER<br><br>"
+    CHUNK="$HEADER\n\n"
     COUNT=0
     MAX_COMMITS=5
 
     for COMMIT in "${readarray[@]}"; do
-        CHUNK+="$COMMIT<br>"
+        CHUNK+="$COMMIT\n"
         COUNT=$((COUNT + 1))
         
         if [ $COUNT -eq $MAX_COMMITS ]; then
-            echo "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
+            printf "%b" "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
             PART_INDEX=$((PART_INDEX + 1))
             COUNT=0
-            CHUNK="$HEADER<br><br>"
+            CHUNK="$HEADER\n\n"
         fi
     done
 
     # Добавляем оставшиеся коммиты, если есть
     if [ $COUNT -gt 0 ]; then
-        echo "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
+        printf "%b" "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
         PART_INDEX=$((PART_INDEX + 1))
     fi
 

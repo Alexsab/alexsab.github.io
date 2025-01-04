@@ -18,7 +18,7 @@ send_telegram_messages() {
             continue
         fi
 
-        MESSAGE=$(tr '\n' ' ' < "./tmp_messages/part_${i}.txt")
+        MESSAGE=$(cat "./tmp_messages/part_${i}.txt")
         echo "Sending part $i to Telegram"
         
         RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${token}/sendMessage" \
