@@ -1,0 +1,12 @@
+{
+  "name": "alexsab.github.io",
+  "version": "1.0.0",
+  "description": "[github pages](https://alexsab.github.io)",
+  "main": "index.js",
+  "scripts": {
+    "prepare_commits": ".github/scripts/prepare_commits.sh",
+    "send_telegram": ".github/scripts/send_telegram.sh"
+  },
+  "author": "Alexsab.ru",
+  "license": "ISC"
+}
