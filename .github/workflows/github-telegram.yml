@@ -49,7 +49,7 @@ jobs:
       - name: Prepare commit messages
         id: prepare
         run: |
-          source ./.github/scripts/prepare_commits.sh
+          source ./.github/scripts/sh/prepare_commits.sh
           total_parts=$(prepare_commits \
             "${{ github.event.repository.name }}" \
             "${{ github.ref_name }}" \
@@ -62,7 +62,7 @@ jobs:
       - name: Send messages to Telegram
         if: ${{ steps.prepare.outputs.total_parts != '0' }}
         run: |
-          source ./.github/scripts/send_telegram.sh
+          source ./.github/scripts/sh/send_telegram.sh
           send_telegram_messages \
             "${{ secrets.TELEGRAM_TOKEN }}" \
             "${{ secrets.TELEGRAM_TO }}" \
