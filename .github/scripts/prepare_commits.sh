@@ -1,13 +1,18 @@
 #!/bin/bash
 # prepare_commits.sh
 
+# Подключаем утилиты
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/utils.sh"
+
 prepare_commits() {
-    local repository_name="$1"
-    local ref_name="$2"
-    local before_sha="$3"
-    local after_sha="$4"
-    local actor="$5"
-    local repository="$6"
+    # Очищаем входные параметры от кавычек
+    local repository_name=$(trim_quotes "$1")
+    local ref_name=$(trim_quotes "$2")
+    local before_sha=$(trim_quotes "$3")
+    local after_sha=$(trim_quotes "$4")
+    local actor=$(trim_quotes "$5")
+    local repository=$(trim_quotes "$6")
 
     # Проверка наличия всех параметров
     if [ -z "$repository_name" ] || [ -z "$ref_name" ] || [ -z "$before_sha" ] || [ -z "$after_sha" ] || [ -z "$actor" ] || [ -z "$repository" ]; then

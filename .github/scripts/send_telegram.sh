@@ -1,10 +1,15 @@
 #!/bin/bash
 # send_telegram.sh
 
+# Подключаем утилиты
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/utils.sh"
+
 send_telegram_messages() {
-    local token="$1"
-    local chat_id="$2"
-    local total_parts="$3"
+    # Очищаем входные параметры от кавычек
+    local token=$(trim_quotes "$1")
+    local chat_id=$(trim_quotes "$2")
+    local total_parts=$(trim_quotes "$3")
 
     if [ -z "$token" ] || [ -z "$chat_id" ] || [ -z "$total_parts" ]; then
         echo "Error: Missing required parameters" >&2
