@@ -30,5 +30,8 @@ send_telegram_messages() {
         if ! echo "$RESPONSE" | grep -q '"ok":true'; then
             echo "Error sending message part $i: $RESPONSE" >&2
         fi
+        
+        # Добавляем небольшую задержку между отправками сообщений
+        sleep 1
     done
 }

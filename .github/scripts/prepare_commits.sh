@@ -16,8 +16,10 @@ prepare_commits() {
         return 1
     fi
 
-    # Подготовка заголовка
-    HEADER="<b>[${repository_name}:${ref_name}]</b>"
+    # Максимальная длина сообщения в Telegram
+    local MAX_LENGTH=4096
+    # Длина для эллипсиса и дополнительного пробела
+    local ELLIPSIS_LENGTH=4
     
     # Инициализируем массив
     declare -a readarray
@@ -47,31 +49,51 @@ prepare_commits() {
         COMMITS_TEXT="$TOTAL_COMMITS new commits"
     fi
 
-    HEADER="$HEADER <b><a href=\"https://github.com/${repository}/compare/${COMPARE_HASH}\">$COMMITS_TEXT</a></b> by <b><a href=\"https://github.com/${actor}\">${actor}</a></b>"
+    # Подготовка заголовка
+    HEADER="<b>[${repository_name}:${ref_name}]</b> <b><a href=\"https://github.com/${repository}/compare/${COMPARE_HASH}\">$COMMITS_TEXT</a></b> by <b><a href=\"https://github.com/${actor}\">${actor}</a></b>"
 
     # Создаем временную директорию для сообщений
     mkdir -p ./tmp_messages || { echo "Error: Failed to create tmp_messages directory" >&2; return 1; }
 
-    # Разбиваем коммиты на части по 40 штук
+    # Разбиваем сообщение на части по количеству символов
     PART_INDEX=0
     CHUNK="$HEADER\n\n"
-    COUNT=0
-    MAX_COMMITS=5
+    CURRENT_LENGTH=${#CHUNK}
+    
+    # Максимальная длина для одного коммита (с учетом заголовка и отступов)
+    local MAX_COMMIT_LENGTH=$((MAX_LENGTH - ${#HEADER} - 2))
 
     for COMMIT in "${readarray[@]}"; do
-        CHUNK+="$COMMIT\n"
-        COUNT=$((COUNT + 1))
-        
-        if [ $COUNT -eq $MAX_COMMITS ]; then
+        # Добавляем перевод строки к коммиту
+        COMMIT_WITH_NEWLINE="$COMMIT\n"
+        COMMIT_LENGTH=${#COMMIT_WITH_NEWLINE}
+
+        # Проверяем длину коммита
+        if [ $COMMIT_LENGTH -gt $MAX_COMMIT_LENGTH ]; then
+            echo "Warning: Commit message is too long and will be truncated" >&2
+            # Обрезаем коммит с учетом места под эллипсис
+            COMMIT_WITH_NEWLINE="${COMMIT_WITH_NEWLINE:0:$((MAX_COMMIT_LENGTH - ELLIPSIS_LENGTH))} ...\n"
+            COMMIT_LENGTH=${#COMMIT_WITH_NEWLINE}
+        fi
+
+        # Проверяем, поместится ли следующий коммит
+        if ((CURRENT_LENGTH + COMMIT_LENGTH > MAX_LENGTH)); then
+            # Сохраняем текущий чанк
             printf "%b" "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
             PART_INDEX=$((PART_INDEX + 1))
-            COUNT=0
-            CHUNK="$HEADER\n\n"
+            
+            # Начинаем новый чанк с заголовка
+            CHUNK="$HEADER\n\n$COMMIT_WITH_NEWLINE"
+            CURRENT_LENGTH=$((${#HEADER} + 2 + COMMIT_LENGTH))
+        else
+            # Добавляем коммит к текущему чанку
+            CHUNK+="$COMMIT_WITH_NEWLINE"
+            CURRENT_LENGTH=$((CURRENT_LENGTH + COMMIT_LENGTH))
         fi
     done
 
-    # Добавляем оставшиеся коммиты, если есть
-    if [ $COUNT -gt 0 ]; then
+    # Сохраняем последний чанк, если он не пустой
+    if [ "$CHUNK" != "$HEADER\n\n" ]; then
         printf "%b" "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
         PART_INDEX=$((PART_INDEX + 1))
     fi
