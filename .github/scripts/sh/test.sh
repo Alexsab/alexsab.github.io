@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Функция для отображения справки
 function show_help() {
   echo "Usage: $0 [OPTIONS]"
