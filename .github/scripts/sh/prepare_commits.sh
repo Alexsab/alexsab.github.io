@@ -30,15 +30,11 @@ prepare_commits() {
         git checkout HEAD || { echo "Error: Failed to checkout HEAD" >&2; return 1; }
         
         # Читаем вывод git log в массив
-        while IFS= read -r line; do
-            readarray+=("$line")
-        done < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" "HEAD..${after_sha}")
+        readarray=("${(@f)$(git log --pretty=format:"<code>%h</code> - %an, %ar : %s" "HEAD..${after_sha}")}")
         COMPARE_HASH="${after_sha}"
     else
         # Читаем вывод git log в массив
-        while IFS= read -r line; do
-            readarray+=("$line")
-        done < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" "${before_sha}..${after_sha}")
+        readarray=("${(@f)$(git log --pretty=format:"<code>%h</code> - %an, %ar : %s" "${before_sha}..${after_sha}")}")
         COMPARE_HASH="${before_sha}..${after_sha}"
     fi
 
