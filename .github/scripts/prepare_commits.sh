@@ -18,17 +18,24 @@ prepare_commits() {
 
     # Подготовка заголовка
     HEADER="<b>[${repository_name}:${ref_name}]</b>"
+    
+    # Инициализируем массив
+    declare -a readarray
 
     if [ "$before_sha" = "0000000000000000000000000000000000000000" ]; then
         git fetch origin HEAD || { echo "Error: Failed to fetch git repository" >&2; return 1; }
         git checkout HEAD || { echo "Error: Failed to checkout HEAD" >&2; return 1; }
         
-        # Сохраняем вывод git log во временный массив
-        mapfile -t readarray < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" "HEAD..${after_sha}")
+        # Читаем вывод git log в массив
+        while IFS= read -r line; do
+            readarray+=("$line")
+        done < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" "HEAD..${after_sha}")
         COMPARE_HASH="${after_sha}"
     else
-        # Сохраняем вывод git log во временный массив
-        mapfile -t readarray < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" "${before_sha}..${after_sha}")
+        # Читаем вывод git log в массив
+        while IFS= read -r line; do
+            readarray+=("$line")
+        done < <(git log --pretty=format:"'<code>%h</code>' - %an, %ar : %s" "${before_sha}..${after_sha}")
         COMPARE_HASH="${before_sha}..${after_sha}"
     fi
 
@@ -49,7 +56,7 @@ prepare_commits() {
     PART_INDEX=0
     CHUNK="$HEADER<br><br>"
     COUNT=0
-    MAX_COMMITS=40
+    MAX_COMMITS=5
 
     for COMMIT in "${readarray[@]}"; do
         CHUNK+="$COMMIT<br>"
