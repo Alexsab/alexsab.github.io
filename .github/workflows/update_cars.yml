@@ -1,0 +1,84 @@
+name: Generate Astro Files from XML
+
+on:
+  # schedule:
+    # - cron: '0 */4 * * *'  # Запускается каждые 4 часа
+  # push:
+    # paths:
+      # - '.github/workflows/github-telegram.yml'
+      # - 'output.txt'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Указываете окружение и его переменные
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set output
+      id: set_output
+      run: |
+        if [ -f output.txt ]; then
+          # Кодируем содержимое файла в base64
+          encoded_output=$(base64 -w 0 output.txt)
+          # Передаем закодированное значение
+          echo "script_output=$encoded_output" >> $GITHUB_OUTPUT
+        fi
+
+    - name: cat output
+      run: |
+        cat output.txt
+
+    - name: Check for changes
+      id: check_changes
+      run: |
+        if git diff --exit-code; then
+          echo 'check_changes true — git diff'
+          echo "changes=true" >> $GITHUB_ENV
+          echo "changes=true" >> $GITHUB_OUTPUT
+        elif git status -s; then
+          echo 'check_changes true — git status'
+          echo "changes=true" >> $GITHUB_ENV
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo 'check_changes else'
+          echo "false — changes=false" >> $GITHUB_ENV
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
+      continue-on-error: true
+
+    - name: Commit files
+      if: env.changes == 'true'
+      run: |
+        git config --local user.email "support+actions@github.com"
+        git config --local user.name "github-actions-bot"
+        if [[ -d public/img/thumbs && $(find public/img/thumbs -type f -name "*.webp") ]]; then git add public/img/thumbs/*.webp; fi
+        if [[ -d src/content/cars && $(find src/content/cars -type f -name "*.mdx") ]]; then git add src/content/cars/*.mdx; fi
+        if [[ -f public/cars.xml ]]; then git add public/cars.xml; fi
+        git commit -m "Update cars from XML" -a || echo "No changes to commit"
+        git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+        git push origin $GITHUB_REF_NAME
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    outputs:
+      changes: ${{ steps.check_changes.outputs.changes }}
+      script_output: ${{ steps.set_output.outputs.script_output }}
+
+
+  notify_telegram:
+    needs: build
+    if: ${{ needs.build.outputs.script_output != '' }}
+    uses: ./.github/workflows/github-telegram.yml
+    with:
+      additional-text: |
+        ${{ needs.build.outputs.script_output }}
+    secrets:
+      TELEGRAM_TO: ${{ secrets.TELEGRAM_TO }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
