@@ -4,8 +4,8 @@
   "description": "[github pages](https://alexsab.github.io)",
   "main": "index.js",
   "scripts": {
-    "prepare_commits": "./.github/scripts/prepare_commits.sh",
-    "send_telegram": "./.github/scripts/send_telegram.sh"
+    "prepare_commits": "./.github/scripts/sh/test.sh --prepare_commits",
+    "send_telegram": "./.github/scripts/sh/test.sh --send_telegram"
   },
   "author": "Alexsab.ru",
   "license": "ISC"

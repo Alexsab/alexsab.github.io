@@ -1,10 +1,6 @@
 #!/bin/bash
 # prepare_commits.sh
 
-# Подключаем утилиты
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/utils.sh"
-
 prepare_commits() {
     # Очищаем входные параметры от кавычек
     local repository_name=$(trim_quotes "$1")

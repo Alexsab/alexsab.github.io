@@ -1,10 +1,6 @@
 #!/bin/bash
 # send_telegram.sh
 
-# Подключаем утилиты
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/utils.sh"
-
 send_telegram_messages() {
     # Очищаем входные параметры от кавычек
     local token=$(trim_quotes "$1")
