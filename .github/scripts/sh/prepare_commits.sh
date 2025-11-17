@@ -24,25 +24,35 @@ collect_commits() {
     fi
     
     # Инициализируем массив
-    local commits=()
+    local -a commits=()
     # Инициализируем строку для запоминания хеша
     local compare_hash=""
 
+    local git_range=""
     if [ "$before_sha" = "0000000000000000000000000000000000000000" ]; then
         git fetch origin HEAD || { echo "Error: Failed to fetch git repository" >&2; return 1; }
         git checkout HEAD || { echo "Error: Failed to checkout HEAD" >&2; return 1; }
-        
-        # Читаем вывод git log в массив
-        mapfile -t commits < <(git log --pretty=format:"<code>%h</code> - %an, %ar : %s" "HEAD..${after_sha}")
+
+        git_range="HEAD..${after_sha}"
         compare_hash="${after_sha}"
     else
-        # Читаем вывод git log в массив
-        mapfile -t commits < <(git log --pretty=format:"<code>%h</code> - %an, %ar : %s" "${before_sha}..${after_sha}")
+        git_range="${before_sha}..${after_sha}"
         compare_hash="${before_sha}..${after_sha}"
     fi
 
+    # Читаем вывод git log в массив (поддерживает bash и zsh)
+    if [ -n "$git_range" ]; then
+        while IFS= read -r commit_line || [ -n "$commit_line" ]; do
+            [ -n "$commit_line" ] && commits+=("$commit_line")
+        done < <(git log --pretty=format:"<code>%h</code> - %an, %ar : %s" "$git_range")
+    fi
+
     # Сохраняем результат в глобальные переменные
-    COMMIT_ARRAY=("${commits[@]}")
+    if [ ${#commits[@]} -gt 0 ]; then
+        COMMIT_ARRAY=("${commits[@]}")
+    else
+        COMMIT_ARRAY=()
+    fi
     COMPARE_HASH="$compare_hash"
     return 0
 }
@@ -63,6 +73,24 @@ prepare_commits_message() {
     local include_header=$(trim_quotes "$6")
     shift 6
     local commit_messages=("$@")
+    
+    # Приводим include_header к нормализованному виду (по умолчанию true)
+    if [ -z "$include_header" ]; then
+        include_header="true"
+    fi
+    local include_header_normalized=$(printf '%s' "$include_header" | tr '[:upper:]' '[:lower:]')
+    case "$include_header_normalized" in
+        true|1|yes|on)
+            include_header="true"
+            ;;
+        false|0|no|off)
+            include_header="false"
+            ;;
+        *)
+            echo "Warning: Unknown include_header value '$include_header'. Defaulting to true." >&2
+            include_header="true"
+            ;;
+    esac
     
     # Максимальная длина сообщения в Telegram
     local MAX_LENGTH=4096
@@ -111,77 +139,79 @@ prepare_commits_message() {
         local MAX_COMMIT_LENGTH=$(($MAX_LENGTH - 30))
     fi
 
-    for COMMIT in "${commit_messages[@]}"; do
-        # Добавляем перевод строки к коммиту
-        COMMIT_WITH_NEWLINE="$COMMIT\n"
-        COMMIT_LENGTH=${#COMMIT_WITH_NEWLINE}
-
-        # Проверяем длину коммита
-        if [ $COMMIT_LENGTH -gt $MAX_COMMIT_LENGTH ]; then
-            echo "Warning: Commit message is too long and will be truncated" >&2
-                        
-            # Обрезаем коммит с учетом места под эллипсис
-            local truncated_commit="${COMMIT_WITH_NEWLINE:0:$(($MAX_COMMIT_LENGTH - $ELLIPSIS_LENGTH))} ..."
-            
-            # Получаем все открытые теги с учетом вложенности
-            local opened_tags_result=$(get_opened_tags "$truncated_commit")
-
-            # Закрываем все открытые теги в обратном порядке (LIFO)
-            if [ -n "$opened_tags_result" ]; then
-                echo "DEBUG: Found open tags: '$opened_tags_result'" >&2
-                
-                # Строим закрывающие теги в обратном порядке
-                local tags_to_close=""
-                local remaining_tags="$opened_tags_result"
-                
-                # Берем теги с конца строки
-                while [ -n "$remaining_tags" ]; do
-                    if [[ "$remaining_tags" == *" "* ]]; then
-                        # Есть еще теги - берем последний
-                        local last_tag="${remaining_tags##* }"
-                        remaining_tags="${remaining_tags% *}"
-                        echo "DEBUG: Processing tag: '$last_tag'" >&2
-                        tags_to_close="${tags_to_close}</$last_tag>"
-                    else
-                        # Последний тег
-                        echo "DEBUG: Processing last tag: '$remaining_tags'" >&2
-                        tags_to_close="${tags_to_close}</$remaining_tags>"
-                        break
-                    fi
-                done
-                
-                echo "DEBUG: Tags to close: '$tags_to_close'" >&2
-                truncated_commit="${truncated_commit}${tags_to_close}"
-            else
-                echo "DEBUG: No open tags found" >&2
-            fi
-
-            
-            COMMIT_WITH_NEWLINE="${truncated_commit}\n"
+    if [ $TOTAL_COMMITS -gt 0 ]; then
+        for COMMIT in "${commit_messages[@]}"; do
+            # Добавляем перевод строки к коммиту
+            COMMIT_WITH_NEWLINE="$COMMIT\n"
             COMMIT_LENGTH=${#COMMIT_WITH_NEWLINE}
-        fi
 
-        # Проверяем, поместится ли следующий коммит (заменили bash-специфичную конструкцию)
-        local total_length=$(($CURRENT_LENGTH + $COMMIT_LENGTH))
-        if [ $total_length -gt $MAX_LENGTH ]; then
-            # Сохраняем текущий чанк
-            printf "%b" "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
-            PART_INDEX=$(($PART_INDEX + 1))
-            
-            # Начинаем новый чанк с заголовка (если он есть)
-            if [ -n "$HEADER" ]; then
-                CHUNK="$HEADER\n\n$COMMIT_WITH_NEWLINE"
-                CURRENT_LENGTH=$((${#HEADER} + 2 + $COMMIT_LENGTH))
-            else
-                CHUNK="$COMMIT_WITH_NEWLINE"
-                CURRENT_LENGTH=$COMMIT_LENGTH
+            # Проверяем длину коммита
+            if [ $COMMIT_LENGTH -gt $MAX_COMMIT_LENGTH ]; then
+                echo "Warning: Commit message is too long and will be truncated" >&2
+                            
+                # Обрезаем коммит с учетом места под эллипсис
+                local truncated_commit="${COMMIT_WITH_NEWLINE:0:$(($MAX_COMMIT_LENGTH - $ELLIPSIS_LENGTH))} ..."
+                
+                # Получаем все открытые теги с учетом вложенности
+                local opened_tags_result=$(get_opened_tags "$truncated_commit")
+
+                # Закрываем все открытые теги в обратном порядке (LIFO)
+                if [ -n "$opened_tags_result" ]; then
+                    echo "DEBUG: Found open tags: '$opened_tags_result'" >&2
+                    
+                    # Строим закрывающие теги в обратном порядке
+                    local tags_to_close=""
+                    local remaining_tags="$opened_tags_result"
+                    
+                    # Берем теги с конца строки
+                    while [ -n "$remaining_tags" ]; do
+                        if [[ "$remaining_tags" == *" "* ]]; then
+                            # Есть еще теги - берем последний
+                            local last_tag="${remaining_tags##* }"
+                            remaining_tags="${remaining_tags% *}"
+                            echo "DEBUG: Processing tag: '$last_tag'" >&2
+                            tags_to_close="${tags_to_close}</$last_tag>"
+                        else
+                            # Последний тег
+                            echo "DEBUG: Processing last tag: '$remaining_tags'" >&2
+                            tags_to_close="${tags_to_close}</$remaining_tags>"
+                            break
+                        fi
+                    done
+                    
+                    echo "DEBUG: Tags to close: '$tags_to_close'" >&2
+                    truncated_commit="${truncated_commit}${tags_to_close}"
+                else
+                    echo "DEBUG: No open tags found" >&2
+                fi
+
+                
+                COMMIT_WITH_NEWLINE="${truncated_commit}\n"
+                COMMIT_LENGTH=${#COMMIT_WITH_NEWLINE}
             fi
-        else
-            # Добавляем коммит к текущему чанку
-            CHUNK="${CHUNK}${COMMIT_WITH_NEWLINE}"
-            CURRENT_LENGTH=$(($CURRENT_LENGTH + $COMMIT_LENGTH))
-        fi
-    done
+
+            # Проверяем, поместится ли следующий коммит (заменили bash-специфичную конструкцию)
+            local total_length=$(($CURRENT_LENGTH + $COMMIT_LENGTH))
+            if [ $total_length -gt $MAX_LENGTH ]; then
+                # Сохраняем текущий чанк
+                printf "%b" "$CHUNK" > "./tmp_messages/part_${PART_INDEX}.txt" || { echo "Error: Failed to write to file" >&2; return 1; }
+                PART_INDEX=$(($PART_INDEX + 1))
+                
+                # Начинаем новый чанк с заголовка (если он есть)
+                if [ -n "$HEADER" ]; then
+                    CHUNK="$HEADER\n\n$COMMIT_WITH_NEWLINE"
+                    CURRENT_LENGTH=$((${#HEADER} + 2 + $COMMIT_LENGTH))
+                else
+                    CHUNK="$COMMIT_WITH_NEWLINE"
+                    CURRENT_LENGTH=$COMMIT_LENGTH
+                fi
+            else
+                # Добавляем коммит к текущему чанку
+                CHUNK="${CHUNK}${COMMIT_WITH_NEWLINE}"
+                CURRENT_LENGTH=$(($CURRENT_LENGTH + $COMMIT_LENGTH))
+            fi
+        done
+    fi
 
     # Сохраняем последний чанк, если он не пустой
     if [ -n "$HEADER" ]; then
