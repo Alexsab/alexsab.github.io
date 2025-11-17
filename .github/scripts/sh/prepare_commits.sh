@@ -1,6 +1,65 @@
 #!/bin/bash
 # prepare_commits.sh
 
+EMPTY_SHA="0000000000000000000000000000000000000000"
+
+########################################
+# Определяет основную ветку origin
+# Приоритет: BASE_BRANCH/DEFAULT_BRANCH env vars,
+# затем origin/HEAD, затем популярные ветки.
+########################################
+detect_default_branch() {
+    if [ -n "${BASE_BRANCH:-}" ]; then
+        echo "${BASE_BRANCH}"
+        return 0
+    fi
+
+    if [ -n "${DEFAULT_BRANCH:-}" ]; then
+        echo "${DEFAULT_BRANCH}"
+        return 0
+    fi
+
+    local head_ref
+    head_ref=$(git symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null || true)
+    if [ -n "$head_ref" ]; then
+        head_ref=${head_ref#refs/remotes/origin/}
+        echo "$head_ref"
+        return 0
+    fi
+
+    local head_branch
+    head_branch=$(git remote show origin 2>/dev/null | awk '/HEAD branch/ {print $NF}')
+    if [ -n "$head_branch" ]; then
+        echo "$head_branch"
+        return 0
+    fi
+
+    for candidate in develop main master; do
+        if git show-ref --verify --quiet "refs/remotes/origin/$candidate"; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+
+    echo ""
+}
+
+########################################
+# Обеспечивает наличие удалённой ветки локально
+########################################
+ensure_remote_branch() {
+    local branch="$1"
+    if [ -z "$branch" ]; then
+        return 1
+    fi
+
+    if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+        return 0
+    fi
+
+    git fetch origin "${branch}:refs/remotes/origin/${branch}" >/dev/null 2>&1
+}
+
 ########################################
 # Функция для сбора коммитов из git log
 # Принимает параметры:
@@ -29,12 +88,31 @@ collect_commits() {
     local compare_hash=""
 
     local git_range=""
-    if [ "$before_sha" = "0000000000000000000000000000000000000000" ]; then
-        git fetch origin HEAD || { echo "Error: Failed to fetch git repository" >&2; return 1; }
-        git checkout HEAD || { echo "Error: Failed to checkout HEAD" >&2; return 1; }
+    if [ "$before_sha" = "$EMPTY_SHA" ]; then
+        local base_branch=""
+        base_branch=$(detect_default_branch)
 
-        git_range="HEAD..${after_sha}"
-        compare_hash="${after_sha}"
+        local merge_base=""
+        if [ -n "$base_branch" ]; then
+            if ensure_remote_branch "$base_branch"; then
+                merge_base=$(git merge-base "$after_sha" "origin/$base_branch" 2>/dev/null || true)
+            else
+                echo "Warning: Failed to fetch base branch '$base_branch'. Falling back to single commit range." >&2
+            fi
+        fi
+
+        if [ -n "$merge_base" ]; then
+            if [ "$merge_base" = "$after_sha" ]; then
+                git_range=""
+                compare_hash=""
+            else
+                git_range="${merge_base}..${after_sha}"
+                compare_hash="${merge_base}..${after_sha}"
+            fi
+        else
+            git_range="${after_sha}^!"
+            compare_hash=""
+        fi
     else
         git_range="${before_sha}..${after_sha}"
         compare_hash="${before_sha}..${after_sha}"
