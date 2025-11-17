@@ -29,3 +29,37 @@ source ./.github/scripts/sh/utils.sh
 source ./.github/scripts/sh/send_telegram.sh
 send_telegram_messages $TELEGRAM_TOKEN $TELEGRAM_TO 2
 ```
+
+
+
+## Tests:
+
+defaults to HEAD~1..HEAD, confirmed it builds the headered message and writes tmp_messages/part_0.txt
+
+```sh
+./.github/scripts/sh/telegram_test.sh -p
+```
+
+
+verified the header suppression path
+
+```sh
+./.github/scripts/sh/telegram_test.sh -p --no-header --before 5b582188077b86e66247c5c9cc63ff86f389fac7 --after 03d5a8d0d76bee2a3671840f7ffecd39e06dbba5 --actor Alexsab --repository Alexsab/alexsab.github.io --repo-name alexsab.github.io --ref develop
+
+./.github/scripts/sh/telegram_test.sh -p --before 0000000000000000000000000000000000000000 --after 494eb21f7767b11b7b00a7071fcf3ef8e612f600
+```
+
+
+send to telegram part 1
+
+```sh
+./.github/scripts/sh/telegram_test.sh -s --parts 1;
+```
+
+Next step: once you’re on a machine with network access (and real token/chat IDs), run 
+
+```sh
+./.github/scripts/sh/telegram_test.sh -p -s
+```
+
+with your desired SHA range to exercise both steps end-to-end.
